@@ -1,0 +1,1 @@
+- v1：分支 `v1`，发布 `v1.0.0` 含git add README.mdshutdown
