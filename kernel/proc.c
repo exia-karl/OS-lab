@@ -140,6 +140,10 @@ allocproc(void)
 
 found:
   p->pid = allocpid();
+  p->utime = 0;
+  p->stime = 0;
+  p->cutime = 0;
+  p->cstime = 0;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -457,6 +461,10 @@ exit(int status)
 
   // Give any children to init.
   reparent(p);
+
+  //The child process time is recovered by the parent process
+  original_parent->cutime += p->utime;
+  original_parent->cstime += p->stime;
 
   // Parent might be sleeping in wait().
   wakeup1(original_parent);

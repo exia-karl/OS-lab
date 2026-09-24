@@ -252,10 +252,12 @@ clean:
 	$U/usys.S \
 	$(UPROGS)
 
-all:
-	@make build
+all: build 
+	@cp $T/kernel ./kernel-qemu
+	@cp $(RUSTSBI) ./sbi-qemu
 
-dump: all
+
+dump: build
 	$(CC) -Os -ffreestanding -fno-common -nostdlib -mno-relax -I. -Ikernel -S $U/init.c -o $U/init.S
 	$(CC) -Os -s -fno-unroll-loops -fmerge-all-constants -ffreestanding -fno-common -nostdlib -mno-relax -I. -Ikernel -c $U/init.c -o $U/init.o
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $U/_init $U/init.o $U/usys.o $U/printf.o

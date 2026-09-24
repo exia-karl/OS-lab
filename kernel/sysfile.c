@@ -70,7 +70,7 @@ sys_dup(void)
     return -1;
   filedup(f);
   return fd;
-}
+} 
 
 uint64
 sys_read(void)
@@ -333,9 +333,11 @@ uint64
 sys_getcwd(void)
 {
   uint64 addr;
+  int size;
   if (argaddr(0, &addr) < 0)
     return -1;
-
+  if ((argint(1,&size)<0))
+    return -1;
   struct dirent *de = myproc()->cwd;
   char path[FAT32_MAX_PATH];
   char *s;
@@ -358,10 +360,14 @@ sys_getcwd(void)
   }
 
   // if (copyout(myproc()->pagetable, addr, s, strlen(s) + 1) < 0)
+  if (strlen(s)+1>size){
+    printf("buffer overflow!\n");
+    return -1;
+  }
   if (copyout2(addr, s, strlen(s) + 1) < 0)
     return -1;
   
-  return 0;
+  return addr;
 
 }
 

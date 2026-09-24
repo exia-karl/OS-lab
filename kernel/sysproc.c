@@ -10,6 +10,7 @@
 #include "include/kalloc.h"
 #include "include/string.h"
 #include "include/printf.h"
+#include "include/vm.h"
 
 extern int exec(char *path, char **argv);
 
@@ -152,5 +153,50 @@ sys_trace(void)
     return -1;
   }
   myproc()->tmask = mask;
+  return 0;
+}
+
+uint64 
+sys_times(void)
+{
+  uint64 addr;
+  if(argaddr(0,&addr)<0){
+    return -1;
+  }
+  struct proc *p=myproc();
+  struct tms t;
+  t.tms_utime=p->utime;
+  t.tms_stime=p->stime;
+  t.tms_cutime=p->cutime;
+  t.tms_cstime=p->cstime;
+  if(copyout2(addr,(char*)&t,sizeof(t))<0&&addr!=0){
+    return -1;
+  }
+  uint64 retime;
+  acquire(&tickslock);
+  retime=ticks;
+  release(&tickslock);
+  return retime;
+}
+
+
+uint64 sys_uname(void)
+{
+  uint64 addr;
+  if(argaddr(0,&addr)<0){
+    return -1;
+  }
+  struct utsname uts;
+  memset(&uts ,0 ,sizeof(uts));
+  safestrcpy(uts.sysname,    "xv6",65);
+  safestrcpy(uts.nodename,   "xv6-host", 65);   // 硬编码主机名
+  safestrcpy(uts.release,    "1.0.0",  65);
+  safestrcpy(uts.version,    "xv6-k210", 65);
+  safestrcpy(uts.machine,    "riscv64", 65);
+  safestrcpy(uts.domainname, "(none)", 65);   // 硬编码域名
+  if (copyout2(addr,(char*)&uts,sizeof(uts))<0){
+    return -1;
+  }
+
   return 0;
 }

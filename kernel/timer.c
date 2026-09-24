@@ -34,7 +34,16 @@ set_next_timeout() {
 void timer_tick() {
     acquire(&tickslock);
     ticks++;
-    wakeup(&ticks);
     release(&tickslock);
+    struct proc *p=myproc();
+    if (p&&p->state==RUNNING){
+        if(r_sstatus() & SSTATUS_SPP){
+            p->stime++;
+        }
+        else{
+            p->utime++;
+        }
+    }
+    wakeup(&ticks);
     set_next_timeout();
 }

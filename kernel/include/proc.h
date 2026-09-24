@@ -64,6 +64,11 @@ struct proc {
   struct dirent *cwd;          // Current directory
   char name[16];               // Process name (debugging)
   int tmask;                    // trace mask
+  uint64 utime;     // 本进程用户态 tick
+  uint64 stime;     // 本进程内核态 tick
+  uint64 cutime;    // 已回收子进程的用户态 tick 累计
+  uint64 cstime;    // 已回收子进程的内核态 tick 累计
+
 };
 
 void            reg_info(void);

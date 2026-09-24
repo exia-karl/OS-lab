@@ -28,12 +28,14 @@ int uptime(void);
 int test_proc(int);
 int dev(int, short, short);
 int readdir(int fd, struct stat*);
-int getcwd(char *buf);
+char* getcwd(char *buf,int bufsize);
 int remove(char *filename);
 int trace(int mask);
 int sysinfo(struct sysinfo *);
 int rename(char *old, char *new);
 void shutdown(void);
+clock_t times(struct tms *buf);
+int uname (struct utsname *buf);
 
 // ulib.c
 int stat(const char*, struct stat*);
