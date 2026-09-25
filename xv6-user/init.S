@@ -5,132 +5,124 @@
 	.section	.rodata.str1.8,"aMS",@progbits,1
 	.align	3
 .LC0:
-	.string	"testing getcwd...\n"
+	.string	"init: starting %s\n"
 	.align	3
 .LC1:
-	.string	"mnt"
+	.string	"init: fork failed\n"
 	.align	3
 .LC2:
-	.string	"cwd = %s\n"
+	.string	"init: exec %s failed\n"
 	.align	3
 .LC3:
-	.string	"real=%d utime=%d stime=%d cutime=%d cstime=%d\n"
-	.align	3
-.LC4:
-	.string	"FAIL: no cpu time recorded\n"
-	.align	3
-.LC5:
-	.string	"times test OK\n"
+	.string	"init: wait returned an error\n"
 	.section	.text.startup,"ax",@progbits
 	.align	1
 	.globl	main
 	.type	main, @function
 main:
-	addi	sp,sp,-208
+	addi	sp,sp,-64
 	li	a2,0
 	li	a1,1
 	li	a0,2
-	sd	ra,200(sp)
-	sd	s0,192(sp)
-	sd	s2,176(sp)
-	sd	s1,184(sp)
+	sd	ra,56(sp)
+	sd	s0,48(sp)
+	sd	s2,32(sp)
+	sd	s3,24(sp)
+	sd	s4,16(sp)
+	sd	s5,8(sp)
+	sd	s1,40(sp)
 	call	dev@plt
 	li	a0,0
 	call	dup@plt
 	li	a0,0
+	lla	s2,.LANCHOR0
 	call	dup@plt
-	lla	a0,.LC0
+	li	s0,0
+	mv	s3,s2
+	lla	s5,.LC0
+	li	s4,5
+.L5:
+	ld	a1,0(s2)
+	mv	a0,s5
 	call	printf@plt
+	call	fork@plt
+	mv	s1,a0
+	bge	a0,zero,.L2
 	lla	a0,.LC1
-	call	chdir@plt
-	addi	s0,sp,72
-	li	a1,100
-	mv	a0,s0
-	call	getcwd@plt
-	mv	a1,s0
+.L11:
+	call	printf@plt
+	j	.L10
+.L2:
+	bne	a0,zero,.L3
+	slli	s0,s0,3
+	add	s0,s3,s0
+	ld	a0,0(s0)
+	lla	a1,.LANCHOR1
+	call	exec@plt
+	ld	a1,0(s0)
 	lla	a0,.LC2
 	call	printf@plt
-	addi	a0,sp,8
-	call	times@plt
-	li	a5,999424
-	mv	s2,a0
-	sw	zero,4(sp)
-	addi	a5,a5,575
-.L2:
-	lw	a4,4(sp)
-	ble	a4,a5,.L3
-	call	fork@plt
-	bne	a0,zero,.L4
-	li	a5,5001216
-	sw	zero,40(sp)
-	addi	a5,a5,-1217
-.L5:
-	lw	a4,40(sp)
-	ble	a4,a5,.L6
-	li	a0,0
-.L9:
+.L10:
+	li	a0,1
 	call	exit@plt
 .L3:
-	lw	a4,4(sp)
-	addiw	a4,a4,1
-	sw	a4,4(sp)
-	j	.L2
-.L6:
-	lw	a4,40(sp)
-	addiw	a4,a4,1
-	sw	a4,40(sp)
-	j	.L5
-.L4:
 	li	a0,0
 	call	wait@plt
-	addi	a0,sp,40
-	call	times@plt
-	ld	a5,8(sp)
-	ld	s0,40(sp)
-	ld	s1,48(sp)
-	ld	a4,64(sp)
-	sub	s0,s0,a5
-	ld	a5,16(sp)
-	ld	a3,56(sp)
-	sext.w	a2,s0
-	sub	s1,s1,a5
-	ld	a5,32(sp)
-	subw	a1,a0,s2
-	add	s0,s0,s1
-	subw	a5,a4,a5
-	ld	a4,24(sp)
+	beq	s1,a0,.L4
+	bge	a0,zero,.L3
 	lla	a0,.LC3
-	subw	a4,a3,a4
-	sext.w	a3,s1
-	call	printf@plt
-	bgt	s0,zero,.L7
-	lla	a0,.LC4
-	call	printf@plt
-	li	a0,1
-	j	.L9
-.L7:
-	lla	a0,.LC5
-	call	printf@plt
+	j	.L11
+.L4:
+	addiw	s0,s0,1
+	addi	s2,s2,8
+	bne	s0,s4,.L5
 	call	shutdown@plt
-	ld	ra,200(sp)
-	ld	s0,192(sp)
-	ld	s1,184(sp)
-	ld	s2,176(sp)
+	ld	ra,56(sp)
+	ld	s0,48(sp)
+	ld	s1,40(sp)
+	ld	s2,32(sp)
+	ld	s3,24(sp)
+	ld	s4,16(sp)
+	ld	s5,8(sp)
 	li	a0,0
-	addi	sp,sp,208
+	addi	sp,sp,64
 	jr	ra
 	.size	main, .-main
-	.globl	argv
+	.globl	tests
 	.section	.rodata.str1.8
 	.align	3
+.LC4:
+	.string	"getcwd"
+	.align	3
+.LC5:
+	.string	"write"
+	.align	3
 .LC6:
-	.string	"sh"
+	.string	"getpid"
+	.align	3
+.LC7:
+	.string	"times"
+	.align	3
+.LC8:
+	.string	"uname"
+	.globl	argv
+	.bss
+	.align	3
+	.set	.LANCHOR1,. + 0
+	.type	argv, @object
+	.size	argv, 8
+argv:
+	.zero	8
 	.section	.data.rel.local,"aw"
 	.align	3
-	.type	argv, @object
-	.size	argv, 16
-argv:
+	.set	.LANCHOR0,. + 0
+	.type	tests, @object
+	.size	tests, 40
+tests:
+	.dword	.LC4
+	.dword	.LC5
 	.dword	.LC6
-	.dword	0
+	.dword	.LC7
+	.dword	.LC8
 	.ident	"GCC: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0"
 	.section	.note.GNU-stack,"",@progbits
