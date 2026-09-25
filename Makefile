@@ -252,7 +252,10 @@ clean:
 	$U/usys.S \
 	$(UPROGS)
 
-all: build 
+all: 
+	@make build
+	@make dump
+	@make $T/kernel
 	@cp $T/kernel ./kernel-qemu
 	@cp $(RUSTSBI) ./sbi-qemu
 
@@ -265,3 +268,11 @@ dump: build
 	$(OBJDUMP) -S $U/_init > $U/init.asm
 	od -v -t x1 -An oo | sed -E 's/ (.{2})/0x\1,/g' > kernel/include/initcode.h
 	rm oo
+
+run-all:
+	@$(MAKE) clean
+	@$(MAKE) build
+	@$(MAKE) dump
+	@$(MAKE) fs
+	@$(MAKE) clean
+	@$(MAKE) run
