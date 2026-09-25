@@ -253,11 +253,15 @@ clean:
 	$(UPROGS)
 
 all: 
-	@make build
-	@make dump
-	@make $T/kernel
 	@cp $T/kernel ./kernel-qemu
 	@cp $(RUSTSBI) ./sbi-qemu
+	@$(MAKE) clean
+	@$(MAKE) build
+	@$(MAKE) dump
+	@$(MAKE) fs
+	@$(MAKE) clean
+	@$(MAKE) run
+	
 
 
 dump: build
