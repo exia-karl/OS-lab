@@ -335,12 +335,12 @@ sys_getcwd(void)
   uint64 addr;
   int size;
   if (argaddr(0, &addr) < 0)
-    return -1;
+    return NULL;
   if ((argint(1,&size)<0))
-    return -1;
+    return NULL;
   struct dirent *de = myproc()->cwd;
   char path[FAT32_MAX_PATH];
-  char *s;
+  char *s = path + sizeof(path) - 1;
   int len;
 
   if (de->parent == NULL) {
@@ -352,9 +352,12 @@ sys_getcwd(void)
       len = strlen(de->filename);
       s -= len;
       if (s <= path)          // can't reach root "/"
-        return -1;
+        return NULL;
       strncpy(s, de->filename, len);
-      *--s = '/';
+      s--;
+      if (s <= path) // can't reach root "/"
+        return NULL;
+      *s = '/';
       de = de->parent;
     }
   }
@@ -362,10 +365,10 @@ sys_getcwd(void)
   // if (copyout(myproc()->pagetable, addr, s, strlen(s) + 1) < 0)
   if (strlen(s)+1>size){
     printf("buffer overflow!\n");
-    return -1;
+    return NULL;
   }
   if (copyout2(addr, s, strlen(s) + 1) < 0)
-    return -1;
+    return NULL;
   
   return addr;
 
